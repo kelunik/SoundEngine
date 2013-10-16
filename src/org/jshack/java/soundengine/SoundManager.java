@@ -1,39 +1,45 @@
 package org.jshack.java.soundengine;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 
 /**
- * Der SoundManager verwaltet die einzelnen Sounds.
+ * stores all sounds and controls them
  * 
  * @author Niklas Keller
- * @version September 2013
- *
+ * @version v1.0
+ * @since v1.0
  */
-
 public class SoundManager {
 	private static HashMap<String, byte[]> soundData;
 	private static HashMap<String, Sound> soundThreads;
 	
-	/**
-	 * Der Static-Block dient als eine Art Konstruktor-Ersatz
-	 */
+	// this class doesn't have a constructor, 
+	// so this is kind of a stand-in
 	static {
 		soundData = new HashMap<String, byte[]>();
 		soundThreads = new HashMap<String, Sound>();
 	}
 	
 	/**
-	 * Lädt eine Sounddatei aus dem Dateisystem.
+	 * private! don't use!
+	 */
+	private SoundManager() {
+		
+	}
+	
+	/**
+	 * loads a file from the filesystem
 	 * 
-	 * @param key Schlüssel, unter dem der Sound intern gespeichert wird
-	 * @param filename Dateiname, relativ zu /res/ innerhalb der .jar / des Projektverzeichnisses
+	 * @param key key to access the sound
+	 * @param filename filename passed to {@link java.io.FileInputStream}
 	 */
 	public static void load(String key, String filename) {
 		byte[] bytes = null;
 		
 		try {
-			InputStream is = SoundManager.class.getResourceAsStream("/"+filename);
+			InputStream is = new FileInputStream(filename);
 			
 			bytes = new byte[is.available()];
 			
@@ -54,20 +60,21 @@ public class SoundManager {
 	}
 	
 	/**
-	 * Startet das Abspielen eines Sounds.
+	 * starts to play a sound
 	 * 
-	 * @param key Schlüssel, unter dem der Sound intern gespeichert wird
-	 * @return true, falls Sound existiert, andernfalls false
+	 * @param key key provided during {@link #load(String, String)}
+	 * @return true if sound is loaded, otherwise false
 	 */
 	public static boolean play(String key) {
 		return play(key, false);
 	}
 	
 	/**
+	 * starts to play a sound
 	 * 
-	 * @param key Schlüssel, unter dem der Sound intern gespeichert wird
-	 * @param loop true, falls der Sound in einer Dauerschleife widergegeben werden soll, andernfalls false.
-	 * @return true, falls Sound existiert, andernfalls false
+	 * @param key key provided during {@link #load(String, String)}
+	 * @param loop true if sound should be looped, otherwise false
+	 * @return true if sound is loaded, otherwise false
 	 */
 	public static boolean play(String key, boolean loop) {
 		if(soundThreads.containsKey(key)) {
@@ -88,9 +95,10 @@ public class SoundManager {
 	}
 	
 	/**
+	 * pause or unpause a sound
 	 * 
-	 * @param key
-	 * @param pause
+	 * @param key key provided during {@link #load(String, String)}
+	 * @param pause if sound should be paused, true, if sound should be unpaused false
 	 */
 	public static void pause(String key, boolean pause) {
 		if(soundThreads.containsKey(key)) {
@@ -99,8 +107,9 @@ public class SoundManager {
 	}
 	
 	/**
+	 * pause or unpause all sounds
 	 * 
-	 * @param pause
+	 * @param pause if sounds should be paused, true, if sounds should be unpaused false
 	 */
 	public static void pauseAll(boolean pause) {
 		for(String key : soundThreads.keySet()) {
@@ -109,8 +118,9 @@ public class SoundManager {
 	}
 	
 	/**
+	 * stop sound if it's playing
 	 * 
-	 * @param key
+	 * @param key key provided during {@link #load(String, String)}
 	 */
 	public static void stop(String key) {
 		if(soundThreads.containsKey(key)) {
@@ -119,7 +129,7 @@ public class SoundManager {
 	}
 	
 	/**
-	 * 
+	 * stop all sounds that're playing
 	 */
 	public static void stopAll() {
 		for(String key : soundThreads.keySet()) {
@@ -128,9 +138,10 @@ public class SoundManager {
 	}
 	
 	/**
+	 * set volume of a already playing sound
 	 * 
-	 * @param key
-	 * @param volume
+	 * @param key key provided during {@link #load(String, String)}
+	 * @param volume volume level, between 1f (max) and .0f (min)
 	 */
 	public static void setVolume(String key, float volume) {
 		if(soundThreads.containsKey(key)) {
