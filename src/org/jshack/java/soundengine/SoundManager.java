@@ -22,9 +22,7 @@ public class SoundManager {
 		soundThreads = new HashMap<String, Sound>();
 	}
 	
-	/**
-	 * private! don't use!
-	 */
+	// private to deactivate
 	private SoundManager() {
 		
 	}

@@ -10,11 +10,19 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
+/**
+ * plays a sound<br />
+ * <big>This is a internal class, do not use it in your projects!</big>
+ * 
+ * @author Niklas Keller
+ * @version v1.0
+ * @since v1.0
+ */
 public class Sound extends Thread {
-	public static final int STATUS_UNKNOWN = 0;
-	public static final int STATUS_PLAYING = 1;
-	public static final int STATUS_PAUSED = 2;
-	public static final int STATUS_ENDED = 3;
+	private static final int STATUS_UNKNOWN = 0;
+	private static final int STATUS_PLAYING = 1;
+	private static final int STATUS_PAUSED = 2;
+	private static final int STATUS_ENDED = 3;
 
 	private int status;
 	private byte[] data;
@@ -24,13 +32,17 @@ public class Sound extends Thread {
 
 	private AudioInputStream ais;
 	private SourceDataLine line;
-
+	
+	/**
+	 * @param data data from soundfile
+	 * @param loop if true, the sound is looped, otherwise only played once
+	 */
 	public Sound(byte[] data, boolean loop) {
 		this.setDaemon(true);
 		this.init(data, loop);
 		this.volume = 1f;
 	}
-
+	
 	private void init(byte[] data, boolean loop) {
 		this.data = data;
 		this.loop = loop;
@@ -57,12 +69,20 @@ public class Sound extends Thread {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void start() {
 		if(startLine()) {
 			super.start();
 		}
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void run() {
 		playSound();
 		
@@ -134,7 +154,12 @@ public class Sound extends Thread {
 			}
 		}
 	}
-
+	
+	/**
+	 * sets the volume of this sound
+	 * 
+	 * @param toVolume volume to set, between 1f (max) and .0f (min)
+	 */
 	public void setVolume(float toVolume) {
 		if(line == null)
 			return;
@@ -144,7 +169,12 @@ public class Sound extends Thread {
 		FloatControl control = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
 		control.setValue(Math.max((float) (Math.log(volume)	/ Math.log(10.0) * 20.0), -80.0f));
 	}
-
+	
+	/**
+	 * pauses / unpauses this sound
+	 * 
+	 * @param pause true to pause, false to unpause
+	 */
 	public void pause(boolean pause) {
 		this.status = pause ? Sound.STATUS_PAUSED : Sound.STATUS_PLAYING;
 
@@ -153,12 +183,11 @@ public class Sound extends Thread {
 				this.notify();
 		}
 	}
-
+	
+	/**
+	 * stops this sound
+	 */
 	public void stopSound() {
 		this.status = Sound.STATUS_ENDED;
-	}
-
-	public int getStatus() {
-		return status;
 	}
 }
