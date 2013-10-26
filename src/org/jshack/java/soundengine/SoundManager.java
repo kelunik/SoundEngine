@@ -8,18 +8,18 @@ import java.util.HashMap;
  * stores all sounds and controls them
  * 
  * @author Niklas Keller
- * @version v1.0
+ * @version v1.1
  * @since v1.0
  */
 public class SoundManager {
 	private static HashMap<String, byte[]> soundData;
-	private static HashMap<String, Sound> soundThreads;
+	private static HashMap<String, CustomArrayList<Sound>> soundThreads;
 	
 	// this class doesn't have a constructor, 
 	// so this is kind of a stand-in
 	static {
-		soundData = new HashMap<String, byte[]>();
-		soundThreads = new HashMap<String, Sound>();
+		soundData = new HashMap<>();
+		soundThreads = new HashMap<>();
 	}
 	
 	// private to deactivate
@@ -33,7 +33,7 @@ public class SoundManager {
 	 * @param key key to access the sound
 	 * @param filename filename passed to {@link java.io.FileInputStream}
 	 */
-	public static void load(String key, String filename) {
+	public static boolean load(String key, String filename) {
 		byte[] bytes = null;
 		
 		try {
@@ -49,12 +49,15 @@ public class SoundManager {
 			}
 			
 			is.close();
+			
+			soundData.put(key, bytes);
+			
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(1);
 		}
 		
-		soundData.put(key, bytes);
+		return false;
 	}
 	
 	/**
@@ -75,19 +78,18 @@ public class SoundManager {
 	 * @return true if sound is loaded, otherwise false
 	 */
 	public static boolean play(String key, boolean loop) {
-		if(soundThreads.containsKey(key)) {
-			soundThreads.get(key).stopSound();
-			soundThreads.put(key, null);
-		}
-		
 		if(soundData.containsKey(key)) {
-			Sound sound = new Sound(soundData.get(key), loop);
+			Sound sound = new Sound(soundData.get(key).clone(), loop);
 			sound.start();
 			
-			soundThreads.put(key, sound);
+			if(soundThreads.containsKey(key)) {
+				soundThreads.get(key).add(sound);
+			} else {
+				soundThreads.put(key, new CustomArrayList<>(sound));
+			}
 			
 			return true;
-		} 
+		}
 		
 		return false;
 	}
@@ -100,7 +102,9 @@ public class SoundManager {
 	 */
 	public static void pause(String key, boolean pause) {
 		if(soundThreads.containsKey(key)) {
-			soundThreads.get(key).pause(pause);
+			for(Sound sound : soundThreads.get(key)) {
+				sound.pause(pause);
+			}
 		}
 	}
 	
@@ -111,7 +115,9 @@ public class SoundManager {
 	 */
 	public static void pauseAll(boolean pause) {
 		for(String key : soundThreads.keySet()) {
-			soundThreads.get(key).pause(pause);
+			for(Sound sound : soundThreads.get(key)) {
+				sound.pause(pause);
+			}
 		}
 	}
 	
@@ -122,7 +128,9 @@ public class SoundManager {
 	 */
 	public static void stop(String key) {
 		if(soundThreads.containsKey(key)) {
-			soundThreads.get(key).stopSound();
+			for(Sound sound : soundThreads.get(key)) {
+				sound.stopSound();
+			}
 		}
 	}
 	
@@ -131,7 +139,9 @@ public class SoundManager {
 	 */
 	public static void stopAll() {
 		for(String key : soundThreads.keySet()) {
-			soundThreads.get(key).stopSound();
+			for(Sound sound : soundThreads.get(key)) {
+				sound.stopSound();
+			}
 		}
 	}
 	
@@ -143,7 +153,9 @@ public class SoundManager {
 	 */
 	public static void setVolume(String key, float volume) {
 		if(soundThreads.containsKey(key)) {
-			soundThreads.get(key).setVolume(volume);
+			for(Sound sound : soundThreads.get(key)) {
+				sound.setVolume(volume);
+			}
 		}
 	}
 }
