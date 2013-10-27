@@ -1,6 +1,7 @@
 package org.jshack.java.soundengine;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -34,11 +35,36 @@ public class SoundManager {
 	 * @param filename filename passed to {@link java.io.FileInputStream}
 	 */
 	public static boolean load(String key, String filename) {
+		try {
+			return loadFromStream(key, new FileInputStream(filename));
+		} catch (FileNotFoundException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * loads a file from inner project
+	 * 
+	 * @param key key to access the sound
+	 * @param filename filename passed to {@link java.io.FileInputStream}
+	 */
+	public static boolean loadFromProject(String key, String filename) {
+		return loadFromStream(key, SoundManager.class.getResourceAsStream("/" + filename));
+	}
+	
+	/**
+	 * loads a file
+	 * 
+	 * @param key key to access the sound
+	 * @param is used {@link java.io.InputStream}
+	 */
+	public static boolean loadFromStream(String key, InputStream is) {
 		byte[] bytes = null;
 		
+		if(is == null)
+			return false;
+		
 		try {
-			InputStream is = new FileInputStream(filename);
-			
 			bytes = new byte[is.available()];
 			
 			int off = 0;
